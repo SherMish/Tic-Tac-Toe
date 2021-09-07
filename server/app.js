@@ -26,24 +26,34 @@ let room = new Room();
 
 io.on("connection", (socket) => {
     console.log("CONNECTED, YAY!")
+    socket.join(12345)
 
     socket.on("join", ({name}) => {
-        console.log(room.numOfPlayers)
-        console.log(room);
        if (room.numOfPlayers == 0) {
-           console.log('in if');
+           console.log("first if")
            room.addPlayer(name, socket.id, 'x');
-           socket.join(12345)
            socket.emit("firstJoin", "Waiting for a second player...");
        }
 
+       //TODO: check if same usernames
+       else if (room.numOfPlayers == 1) {
+            console.log("second if")
+            room.addPlayer(name, socket.id, 'o');
+            socket.in(12345).emit("secondJoin", room.players);
+            socket.emit("secondJoin", room.players);
+
+       }
     })
 
 
     socket.on("disconnect", () => {
         console.log("the user has disconnected!");
-        //TODO
-        //room.deleteUser(socket.id);
+        room.deletePlayer(socket.id);
+        socket.in(12345).emit("playerLeft", room.players)
+
+        if(room.numOfPlayers == 0) {
+            room = new Room();
+        }
 
 
     })

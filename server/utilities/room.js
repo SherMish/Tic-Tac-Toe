@@ -13,6 +13,14 @@ class Room {
         this.players.push(new Player(name,id,piece));
         this.numOfPlayers++;
     }
+
+    deletePlayer(id) {
+        const index = this.players.findIndex((player) => player.id === id);
+         if(index !== -1) {
+            this.numOfPlayers--;
+            return this.players.splice(index, 1)[0];
+         } 
+    }
 }
 
 module.exports = Room
