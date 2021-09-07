@@ -5,7 +5,7 @@ import './Join.css'
 
 function Join() {
     const [name, setName] = useState('');
-    const [room, setRoom] = useState('');
+    //const [room, setRoom] = useState('');
 
 
     return (
@@ -16,10 +16,10 @@ function Join() {
                 <div>
                     <input placeholder="Name" className="joinInput" type="text" onChange={(event) => setName(event.target.value)} />
                 </div>
-                <div>
+                {/* <div>
                     <input placeholder="Room" className="joinInput mt-20" type="text" onChange={(event) => setRoom(event.target.value)} />
-                </div>
-                <Link onClick={e => (!name || !room) ? e.preventDefault() : null} to={`/game?name=${name}&room=${room}`}>
+                </div> */}
+                <Link onClick={e => (!name) ? e.preventDefault() : null} to={`/game?name=${name}`}>
                     <button className={'button mt-20'} type="submit">Play Now</button>
                 </Link>
             </div>
