@@ -4,14 +4,23 @@ const Player = require('./player')
 class Room {
     constructor() {
         this.players= [],
-        this.numOfPlayers= 0,
-        this.gameStarted= false,
-        this.board= new Board()
+        this.numOfPlayers = 0,
+        this.gameStarted = false;
+        this.board= new Board(),
+        this.is_game_over = false;
     }
 
     addPlayer(name, id, piece) {
         this.players.push(new Player(name,id,piece));
         this.numOfPlayers++;
+    }
+
+    setGameStarted(bool) {
+        this.gameStarted = true;
+    }
+
+    getGameStarted() {
+        return this.gameStarted;
     }
 
     deletePlayer(id) {
@@ -39,12 +48,26 @@ class Room {
     }
 
     isWinner() {
-        return this.board.isWinner()
+        return this.board.isWinner();
+    }
+
+    isDraw() {
+        return this.board.isDraw();
     }
 
     getBoardArray() {
         return this.board.getArray();
     }
+
+    gameOver() {
+        this.is_game_over = true;
+        return true;
+    }
+
+    isGameOver() {
+        return this.is_game_over;
+    }
+
 
 }
 

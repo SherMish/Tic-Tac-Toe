@@ -76,11 +76,18 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
         })
 
         socket.on("afterStep", (history, msg) => {
-            console.log(history);
-            console.log(msg);
             setHistory(history);
             setMsg(msg);
 
+        })
+
+        socket.on("gameInProgress", (msg) => {
+            setMsg(msg);
+        })
+
+        socket.on("gameOver", (msg, history) => {
+            setMsg(msg);
+            setHistory(history);
         })
     }, []);
 
@@ -94,7 +101,7 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
 
     if(termination) {
         return (
-        <div>
+        <div className="message">
             <h1>The game was terminated.</h1>
         </div>
         );
@@ -114,8 +121,8 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
     }
             
     return (
-        <div>
-            <h1>{msg}</h1>
+        <div className="message">
+                <h1>{msg}</h1>
         </div>
 
     );

@@ -26,13 +26,23 @@ class Board{
     isWinner() {
         for (let winState of this.winStates) {
             let piece = this.game[winState[0]];
-            if (piece) {
+            if (piece != null) {
                 if (this.game[winState[1]] == piece && this.game[winState[2]] == piece) {
                     return true;
                 }
             } 
         }
         return false;
+    }
+
+    isDraw() {
+        for (let tile of this.game) {
+            if (tile == null) {
+                return false;
+            }
+        }
+        console.log("returning TRUEEEEEEEeee");
+        return true;
     }
 
     getArray() {

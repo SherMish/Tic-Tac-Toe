@@ -25,20 +25,22 @@ let room = new Room();
 
 
 io.on("connection", (socket) => {
-    console.log("CONNECTED, YAY!")
+    if(room.getGameStarted) {
+        socket.emit("gameInProgress", "A game is in progress, please try again later");
+
+    }
     socket.join(12345)
 
     socket.on("join", ({name}) => {
        if (room.numOfPlayers == 0) {
-           console.log("first if")
            room.addPlayer(name, socket.id, 'X');
            socket.emit("firstJoin", "Waiting for a second player...");
        }
 
        //TODO: check if same usernames
        else if (room.numOfPlayers == 1) {
-            console.log("second if")
             room.addPlayer(name, socket.id, 'O');
+            room.setGameStarted(true);
             socket.in(12345).emit("secondJoin", room.players, `Good luck! ${room.getPlayerNameTurn()}'s turn`, room.getBoardArray());
             socket.emit("secondJoin", room.players, `Good luck! ${room.getPlayerNameTurn()}'s turn`, room.getBoardArray());
 
@@ -47,8 +49,9 @@ io.on("connection", (socket) => {
     })
 
     socket.on("step", (index => {
-        if (room.getPlayerIdTurn() != socket.id) {
-            //Opponent`s turn- do nothing!
+        let player_played_name = room.getPlayerNameTurn();
+        if (room.getPlayerIdTurn() != socket.id || room.isGameOver()) {
+            //Opponent`s turn or game over- do nothing!
             return;
         }
         
@@ -59,16 +62,19 @@ io.on("connection", (socket) => {
             return;
         }
         //else, the game board was updated.
-
         if (room.isWinner()) { //the current player has won
-            socket.in(12345).emit("gameOver", `Game over, ${room.getPlayerNameTurn()} won!`);
-            socket.emit("gameOver", `Game over, ${room.getPlayerNameTurn()} won!`);
+            room.gameOver();
+            socket.in(12345).emit("gameOver", `Game over, ${player_played_name} won!`, room.getBoardArray());
+            socket.emit("gameOver", `Game over, ${player_played_name} won!`,room.getBoardArray() );
+            return;
         }
-        // if (room.isDraw()) {
-        //     socket.in(12345).emit("draw", `Game over! Draw`);
-        //     socket.emit("draw", `Game over! Draw`);
-        // }
-        //else - next step
+        if (room.isDraw()) {
+            console.log(room.getBoardArray());
+            room.gameOver();
+            socket.in(12345).emit("gameOver", `Game over! Draw`, room.getBoardArray());
+            socket.emit("gameOver", `Game over! Draw`, room.getBoardArray());
+            return;
+        }
 
         socket.in(12345).emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn`);
             socket.emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn `);
