@@ -7,8 +7,36 @@ class Board{
             [0, 4, 8], [2, 4, 6]
         ]
         this.end = false
-        this.turn = 'X'
+        this.turn = 0; // first player in the array
         this.switch = new Map([['X', 'O'], ['O', 'X']])
+    }
+
+    getTurn() {
+        return this.turn;
+    }
+
+    updateBoard(index, piece) {
+        if (this.game[index]) return false;
+        this.game[index] = piece;
+        if (this.turn == 0) this.turn = 1;
+        else this.turn = 0;
+        return true;
+    }
+
+    isWinner() {
+        for (let winState of this.winStates) {
+            let piece = this.game[winState[0]];
+            if (piece) {
+                if (this.game[winState[1]] == piece && this.game[winState[2]] == piece) {
+                    return true;
+                }
+            } 
+        }
+        return false;
+    }
+
+    getArray() {
+        return this.game;
     }
 }
 

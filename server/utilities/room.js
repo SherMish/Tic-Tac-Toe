@@ -21,6 +21,31 @@ class Room {
             return this.players.splice(index, 1)[0];
          } 
     }
+
+    getPlayerNameTurn() {
+        return this.players[this.board.getTurn()].getName();
+    }
+
+    getPlayerIdTurn() {
+        return this.players[this.board.getTurn()].getId();
+    }
+
+    getCurrentPiece() {
+        return this.players[this.board.getTurn()].getPiece();
+    }
+
+    addStep(index) {
+        return this.board.updateBoard(index, this.getCurrentPiece());
+    }
+
+    isWinner() {
+        return this.board.isWinner()
+    }
+
+    getBoardArray() {
+        return this.board.getArray();
+    }
+
 }
 
 module.exports = Room
