@@ -2,97 +2,93 @@ const express = require("express");
 const http = require('http');
 const cors = require('cors');
 
-const Player = require('./utilities/player')
-const Board = require('./utilities/board')
 const Room = require('./utilities/room')
 
-
 const PORT = process.env.PORT || 5000;
+const ROOM_ID = Math.random().toString(36).slice(2);
+
 const app = express();
 const server = http.createServer(app)
 
 var io = require('socket.io')(server, {
     'cors': 
     { 'methods': ['GET', 'PATCH', 'POST', 'PUT'], 
-    'origin': true //any origin..
+    'origin': true //any origin
     } 
 }); 
-
 
 app.use(cors());
 
 let room = new Room();
 
-
 io.on("connection", (socket) => {
-    if(room.getGameStarted) {
-        socket.emit("gameInProgress", "A game is in progress, please try again later");
-
+    if(room.isGameStarted()) {
+        socket.emit("gameInProgress");
     }
-    socket.join(12345)
+
+    socket.join(ROOM_ID);
 
     socket.on("join", ({name}) => {
-       if (room.numOfPlayers == 0) {
-           room.addPlayer(name, socket.id, 'X');
+       if (room.getNumOfPlayers() == 0) { //if fist player joining
+           room.addPlayer(name, socket.id, 'X'); // first player starts first
            socket.emit("firstJoin", "Waiting for a second player...");
        }
 
-       //TODO: check if same usernames
-       else if (room.numOfPlayers == 1) {
+       else if (room.getNumOfPlayers() == 1) { // one player already joined before the current one
             room.addPlayer(name, socket.id, 'O');
             room.setGameStarted(true);
-            socket.in(12345).emit("secondJoin", room.players, `Good luck! ${room.getPlayerNameTurn()}'s turn`, room.getBoardArray());
+            //first emit to the other player
+            socket.in(ROOM_ID).emit("secondJoin", room.players, `Good luck! ${room.getPlayerNameTurn()}'s turn`, room.getBoardArray());
+            //then emit to the current player
             socket.emit("secondJoin", room.players, `Good luck! ${room.getPlayerNameTurn()}'s turn`, room.getBoardArray());
-
        }
-       //TODO: if another player tries to join
     })
 
     socket.on("step", (index => {
-        let player_played_name = room.getPlayerNameTurn();
+        let playerName = room.getPlayerNameTurn();
         if (room.getPlayerIdTurn() != socket.id || room.isGameOver()) {
-            //Opponent`s turn or game over- do nothing!
+            //Opponent`s turn or game over- do nothing
             return;
         }
         
-
         let result = room.addStep(index);
         if (!result) {
-            //Tile occupied - do nothing!
+            //Tile occupied - do nothing
             return;
         }
         //else, the game board was updated.
         if (room.isWinner()) { //the current player has won
             room.gameOver();
-            socket.in(12345).emit("gameOver", `Game over, ${player_played_name} won!`, room.getBoardArray());
-            socket.emit("gameOver", `Game over, ${player_played_name} won!`,room.getBoardArray() );
+            //first emit to the other player
+            socket.in(ROOM_ID).emit("gameOver", `Game over, ${playerName} won!`, room.getBoardArray());
+            //then emit to the current player
+            socket.emit("gameOver", `Game over, ${playerName} won!`,room.getBoardArray() );
             return;
         }
         if (room.isDraw()) {
             console.log(room.getBoardArray());
             room.gameOver();
-            socket.in(12345).emit("gameOver", `Game over! Draw`, room.getBoardArray());
+            //first emit to the other player
+            socket.in(ROOM_ID).emit("gameOver", `Game over! Draw`, room.getBoardArray());
+            //then emit to the current player
             socket.emit("gameOver", `Game over! Draw`, room.getBoardArray());
             return;
         }
 
-        socket.in(12345).emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn`);
-            socket.emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn `);
-
-
+        //first emit to the other player
+        socket.in(ROOM_ID).emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn`);
+        //then emit to the current player
+        socket.emit("afterStep", room.getBoardArray(), `${room.getPlayerNameTurn()}'s turn `);
     }))
-
 
     socket.on("disconnect", () => {
         console.log("the user has disconnected!");
         room.deletePlayer(socket.id);
-        socket.in(12345).emit("playerLeft", room.players)
-
-        if(room.numOfPlayers == 0) {
+        //emit to the other player
+        socket.in(ROOM_ID).emit("playerLeft", room.players)
+        if(room.getNumOfPlayers() == 0) {
             room = new Room();
         }
-
-
     })
 });
 

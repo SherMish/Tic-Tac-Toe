@@ -7,7 +7,7 @@ class Room {
         this.numOfPlayers = 0,
         this.gameStarted = false;
         this.board= new Board(),
-        this.is_game_over = false;
+        this.gameOverFlag = false;
     }
 
     addPlayer(name, id, piece) {
@@ -15,11 +15,11 @@ class Room {
         this.numOfPlayers++;
     }
 
-    setGameStarted(bool) {
+    setGameStarted() {
         this.gameStarted = true;
     }
 
-    getGameStarted() {
+    isGameStarted() {
         return this.gameStarted;
     }
 
@@ -43,6 +43,10 @@ class Room {
         return this.players[this.board.getTurn()].getPiece();
     }
 
+    getNumOfPlayers() {
+        return this.numOfPlayers;
+    }
+
     addStep(index) {
         return this.board.updateBoard(index, this.getCurrentPiece());
     }
@@ -60,15 +64,12 @@ class Room {
     }
 
     gameOver() {
-        this.is_game_over = true;
-        return true;
+        this.gameOverFlag = true;
     }
 
     isGameOver() {
-        return this.is_game_over;
+        return this.gameOverFlag;
     }
-
-
 }
 
 module.exports = Room

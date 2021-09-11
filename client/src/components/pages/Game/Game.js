@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import {Redirect} from 'react-router-dom'
 import queryString from 'query-string';
 import io from 'socket.io-client';
 import Board from '../../helpers/Board'
-import {calculateWinner} from '../../helpers/helper'
+
 
 import './Game.css'
 
@@ -11,45 +10,20 @@ let socket;
 
 function Game({location}) {
 
-    const [name, setName] = useState("");
-    //const [room, setRoom] = useState("");
     const [msg, setMsg] = useState("");
     const [gameStarted, setGameStarted] = useState(false);
     const [players, setPlayers] = useState([])
     const [termination, setTermination]= useState(false); 
     const ENDPOINT = 'localhost:5000';
 
-//************************************ */
-const [history, setHistory] = useState([Array(9).fill(null)]); // array in which the first element is array of size 9 with nulls
-  //const [stepNumber, setStepNumber] = useState(0);
-  //const [xIsNext, setXisNext] = useState(true);
-  //const winner = calculateWinner(history[stepNumber]);
-  //const xO = xIsNext ? "X" : "O";
 
+const [gameArr, setGameArr] = useState([]); //
   const handleClick = (i) => {
     socket.emit("step", i);
-
-    // const historyPoint = history.slice(0, stepNumber + 1);
-    // const current = historyPoint[stepNumber];
-    // const squares = [...current];
-    // // return if won or occupied
-    // if (winner || squares[i]) return;
-    // // select square
-    // squares[i] = xO;
-    // setHistory([...historyPoint, squares]);
-    // setStepNumber(historyPoint.length);
-    // setXisNext(!xIsNext);
   };
-
-
-
-//************************************* */
-
 
     useEffect( () => {
         const {name} = queryString.parse(location.search);
-        setName(name);
-        //setRoom(room);
 
         socket = io(ENDPOINT);
 
@@ -62,32 +36,30 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
             setMsg(msg);
         })
 
-        socket.on("secondJoin", (serverPlayers, msg, history)=> {
+        socket.on("secondJoin", (serverPlayers, msg, gameArr)=> {
             setMsg(msg);
-            setGameStarted(true);
             setPlayers(serverPlayers);
-            setHistory(history);
-            //console.log(serverPlayers)
-
+            setGameStarted(true);
+            setGameArr(gameArr);
         })
 
         socket.on("playerLeft", (serverPlayers) => {
             setPlayers(serverPlayers);
         })
 
-        socket.on("afterStep", (history, msg) => {
-            setHistory(history);
-            setMsg(msg);
-
-        })
-
-        socket.on("gameInProgress", (msg) => {
+        socket.on("afterStep", (gameArr, msg) => {
+            setGameArr(gameArr);
             setMsg(msg);
         })
 
-        socket.on("gameOver", (msg, history) => {
+        socket.on("gameInProgress", () => {
+            setTermination(true);
+            alert("The room is full. Please try again later");
+        })
+
+        socket.on("gameOver", (msg, gameArr) => {
             setMsg(msg);
-            setHistory(history);
+            setGameArr(gameArr);
         })
     }, []);
 
@@ -95,9 +67,8 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
         if (players.length < 2 && gameStarted) { //the opponent has left - terminate the game 
             setTermination(true);
             alert("Opponent left! The game was terminated");
-
         }
-    },[players]);
+    },[players, gameStarted]);
 
     if(termination) {
         return (
@@ -114,7 +85,7 @@ const [history, setHistory] = useState([Array(9).fill(null)]); // array in which
                 <h1>{msg}</h1>
             </div>
             <div className="boardClass">
-                <Board squares={history} onClick={handleClick} />
+                <Board squares={gameArr} onClick={handleClick} />
             </div>
             </>
         );

@@ -6,9 +6,7 @@ class Board{
             [0, 3, 6], [1, 4, 7],[2, 5, 8],
             [0, 4, 8], [2, 4, 6]
         ]
-        this.end = false
         this.turn = 0; // first player in the array
-        this.switch = new Map([['X', 'O'], ['O', 'X']])
     }
 
     getTurn() {
@@ -16,11 +14,11 @@ class Board{
     }
 
     updateBoard(index, piece) {
-        if (this.game[index]) return false;
+        if (this.game[index]) return false; // tile occupied
         this.game[index] = piece;
-        if (this.turn == 0) this.turn = 1;
+        if (this.turn == 0) this.turn = 1; //switch turns
         else this.turn = 0;
-        return true;
+        return true; //updated successfully
     }
 
     isWinner() {
@@ -41,7 +39,6 @@ class Board{
                 return false;
             }
         }
-        console.log("returning TRUEEEEEEEeee");
         return true;
     }
 
