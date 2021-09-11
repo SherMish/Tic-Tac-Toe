@@ -6,12 +6,12 @@ communication.
 
 ### Screenshots
 Home page:
-![home-page]()
+![home-page](https://github.com/SherMish/Tic-Tac-Toe/blob/master/client/src/assets/screenshots/home.jpg?raw=true)
 
 Gameplay:
-![game-play]()
+![game-play](https://github.com/SherMish/Tic-Tac-Toe/blob/master/client/src/assets/screenshots/gameplay.jpg?raw=true)
 
 Error:
-![error]()
+![error](https://github.com/SherMish/Tic-Tac-Toe/blob/master/client/src/assets/screenshots/error.jpg?raw=true)
 
 
