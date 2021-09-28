@@ -18,6 +18,8 @@ class Board{
         this.game[index] = piece;
         if (this.turn == 0) this.turn = 1; //switch turns
         else this.turn = 0;
+        console.log('index',index);
+        console.log('game:', this.game)
         return true; //updated successfully
     }
 

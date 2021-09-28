@@ -14,20 +14,26 @@ function Game({location}) {
     const [gameStarted, setGameStarted] = useState(false);
     const [players, setPlayers] = useState([])
     const [termination, setTermination]= useState(false); 
+    const [roomId, setRoomId] = useState("");
     const ENDPOINT = 'localhost:5000';
 
 
 const [gameArr, setGameArr] = useState([]); //
   const handleClick = (i) => {
-    socket.emit("step", i);
+      console.log('I IS:::', i)
+      let obj= {
+        i:i,roomId:roomId
+      }
+    socket.emit("step", obj);
   };
 
     useEffect( () => {
-        const {name} = queryString.parse(location.search);
+        const {name, roomId} = queryString.parse(location.search);
+        setRoomId(roomId);
 
         socket = io(ENDPOINT);
 
-        socket.emit("join", {name})
+        socket.emit("join", {name, roomId})
 
     }, [ENDPOINT, location.search]);
 
@@ -48,6 +54,7 @@ const [gameArr, setGameArr] = useState([]); //
         })
 
         socket.on("afterStep", (gameArr, msg) => {
+            console.log(gameArr);
             setGameArr(gameArr);
             setMsg(msg);
         })

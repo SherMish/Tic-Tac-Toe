@@ -2,7 +2,8 @@ const Board = require('./board')
 const Player = require('./player')
 
 class Room {
-    constructor() {
+    constructor(roomId) {
+        this.id= roomId,
         this.players= [],
         this.numOfPlayers = 0,
         this.gameStarted = false;
@@ -69,6 +70,11 @@ class Room {
 
     isGameOver() {
         return this.gameOverFlag;
+    }
+
+    isPlayerIdInRoom(id) {
+        if (this.players[0].id == id || this.players[1].id == id) return true;
+        else return false;
     }
 }
 
